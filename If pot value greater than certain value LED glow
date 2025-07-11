@@ -1,0 +1,40 @@
+#define _XTAL_FREQ 32000000
+#include "mcc_generated_files/system/system.h"
+#include<stdio.h>
+int main(void)
+{
+  LATDbits.LATD4=0; 
+  uint16_t adc_value;
+  SYSTEM_Initialize();
+  ADC_Enable();
+  while(1)
+  {
+  
+  ADC_ConversionStart();
+  if(ADC_IsConversionDone())
+  {
+   adc_value= ADC_ConversionResultGet();
+  }
+  
+  if (adc_value >= 585)
+  {
+    LATDbits.LATD4 = 1; // LED ON (voltage > ~2.0V)
+  }
+  else{
+    LATDbits.LATD4 = 0; // LED OFF (voltage <= ~2.0V)
+  }
+   /*
+  if(adc_value<=500 && adc_value>=0)
+  {
+      LATDbits.LATD4=0;
+  }
+  else if(adc_value>500 && adc_value<1023)
+  {
+      LATDbits.LATD4=1;
+  }
+    */
+  
+  }
+  
+
+}
