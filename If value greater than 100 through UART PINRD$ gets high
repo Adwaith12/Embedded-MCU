@@ -1,0 +1,45 @@
+#include "mcc_generated_files/system/system.h"
+#include <stdlib.h>
+#include <stdint.h>
+
+#define LED_PIN LATDbits.LATD4
+
+void main(void)
+{
+    // Initialize system and peripherals
+    SYSTEM_Initialize();
+    
+    // Set RD4 as output
+    TRISDbits.TRISD4 = 0;
+    ANSELDbits.ANSD4 = 0;  // Digital mode
+    LED_PIN = 0;           // Initially OFF
+
+    uint8_t uart_buffer[4];   // To store received characters like "123"
+    uint8_t index = 0;
+
+    while (1)
+    {
+        if (EUSART2_IsRxReady())
+        {
+            char ch = EUSART2_Read(); // Read received character
+            
+            // Check if it's Enter or buffer full
+            if (ch == '\r' || ch == '\n' || index >= 3)
+            {
+                uart_buffer[index] = '\0'; // Null-terminate string
+                uint8_t value = (uint8_t)atoi((char*)uart_buffer); // Convert to number
+                
+                if (value > 100)
+                    LED_PIN = 1;
+                else
+                    LED_PIN = 0;
+
+                index = 0; // Reset for next input
+            }
+            else if (ch >= '0' && ch <= '9')
+            {
+                uart_buffer[index++] = ch; // Add to buffer
+            }
+        }
+    }
+}
