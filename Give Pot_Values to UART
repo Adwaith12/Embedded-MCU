@@ -1,0 +1,28 @@
+#define _XTAL_FREQ 32000000
+#include "mcc_generated_files/system/system.h"
+#include<stdio.h>
+#include<stdint.h>
+
+int main(void)
+{
+    SYSTEM_Initialize();
+    ADC_Enable();
+    uint16_t ADC_val;
+    EUSART2_TransmitEnable();
+    EUSART2_ReceiveEnable();
+    
+    while(1)
+    {
+        ADC_ConversionStart();
+        if(ADC_IsConversionDone())
+          {
+             ADC_val= ADC_ConversionResultGet();
+             
+             if(EUSART2_IsTxReady())
+             {
+                EUSART2_Write(ADC_val); 
+                printf("Potentiometer value is %u \r\n",ADC_val);
+             }  
+          }
+    }    
+}
